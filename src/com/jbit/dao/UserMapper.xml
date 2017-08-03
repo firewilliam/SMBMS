@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jbit.dao.UserMapper" >
+	<resultMap type="User" id="userRoleResult">
+		<id property="id" column="id"/>
+		<result property="userCode" column="userCode" />
+		<result property="userName" column="userName" />
+		<result property="gender" column="gender" />
+		<result property="address" column="address" />
+		<result property="userRole" column="userRole" />
+		<result property="phone" column="phone" />
+		<result property="birthday" column="birthday" />
+		<association property="role" javaType="Role" >
+			<id property="id" column="r_id"/>
+			<result property="roleCode" column="roleCode"/>
+			<result property="roleName" column="roleName"/>
+		</association> 
+	</resultMap>
+
+  <select id="login" parameterType="User" resultType="User">
+  	select id,userName,userPassword from smbms_user where userCode=#{userCode} and userPassword=#{userPassword}
+  </select>
+  <select id="getUserList" resultMap="userRoleResult" parameterType="User">
+  	select u.*,r.id as r_id,r.roleName from smbms_user u,smbms_role r where u.userRole = r.id
+  	<if test="userName!=null">
+  		And userName=#{userName}
+  	</if>
+  	<if test="userRole!=null">
+  		And userRole=#{userRole}
+  	</if>
+  </select>
+  
+  <update id="modify" parameterType="User">
+		update smbms_user set userCode=#{userCode},userName=#{userName},userPassword=#{userPassword},
+						gender=#{gender},birthday=#{birthday},phone=#{phone},address=#{address},
+						userRole=#{userRole},modifyBy=#{modifyBy},modifyDate=#{modifyDate}
+		 		where id = #{id}
+	</update>
+	<insert id="add" parameterType="User">
+		insert into smbms_user(userCode,userName,userPassword,gender,birthday,phone,address,userRole,modifyBy,modifyDate) values(#{userCode},#{userName},#{userPassword},
+						#{gender},#{birthday},#{phone},#{address},
+						#{userRole},#{modifyBy},#{modifyDate})
+	</insert>
+	<delete id="delet" parameterType="User">
+		DELETE FROM smbms_user WHERE id = #{id}
+	</delete>
+	
+	<update id="updatePwd">
+		update smbms_user set userPassword=#{userPassword} where id=#{id}
+	</update>
+	
+	
+	<select id="getUserListByRoleId" parameterType="Integer" resultMap="userRoleResult">
+		select u.*,r.id as r_id,r.roleCode,r.roleName from smbms_user u,smbms_role r 
+				where u.userRole = #{userRole} and u.userRole = r.id
+	</select>
+	<select id="getUserById" parameterType="User"  resultMap="userRoleResult">
+		select u.*,r.id as r_id,r.roleName from smbms_user u,smbms_role r where u.userRole = r.id and u.id=#{id}
+	</select>
+</mapper>
